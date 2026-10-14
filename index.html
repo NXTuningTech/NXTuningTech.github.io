@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NX Tuning Tech | The Peak of Engine Management</title>
+    <!-- Φόρτωση Premium Γραμματοσειρών από την Google -->
+    <!-- Χρησιμοποιούμε τη "Syncopate" για μοντέρνο, απλωμένο τίτλο και τη "Montserrat" για καθαρό κείμενο -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Βασικές Μεταβλητές Χρωμάτων */
+        :root {
+            --black: #030303;
+            --dark-grey: #0a0a0a;
+            --light-grey: #777777;
+            --white: #ffffff;
+            --accent: #4DA8DA; /* Το γαλάζιο του λογισμικού, χρησιμοποιείται διακριτικά */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Τυπογραφία */
+        h1, h2, h3, .brand-font {
+            font-family: 'Syncopate', sans-serif;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            letter-spacing: 5px;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+
+        p {
+            font-weight: 300;
+            font-size: 1rem;
+            line-height: 2;
+            color: var(--light-grey);
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(3,3,3,0.9) 0%, rgba(3,3,3,0) 100%);
+            transition: background 0.3s ease;
+        }
+
+        .logo {
+            width: 150px; /* Μέγεθος του λογοτύπου σου (logo.jpg / start_logo.png) */
+            height: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            /* ΕΔΩ ΜΠΑΙΝΕΙ Η ΚΕΝΤΡΙΚΗ ΦΩΤΟΓΡΑΦΙΑ */
+            /* Αντικατέστησε το 'hero_image.jpg' με τη δική σου */
+            background-image: linear-gradient(rgba(3, 3, 3, 0.3), rgba(3, 3, 3, 0.9)), url('hero_image.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Parallax εφέ */
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 700;
+            letter-spacing: 15px;
+            margin-bottom: 1rem;
+            text-shadow: 0 10px 30px rgba(0,0,0,1);
+            animation: fadeInDown 1.5s ease forwards;
+            opacity: 0;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2rem;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            color: var(--light-grey);
+            animation: fadeInUp 1.5s ease forwards 0.5s;
+            opacity: 0;
+        }
+
+        /* --- SHOWCASE SECTIONS --- */
+        .showcase {
+            display: flex;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0 5%;
+            background-color: var(--black);
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s ease; /* Animation εμφάνισης (Fade In) */
+        }
+
+        .showcase.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .showcase.reverse {
+            flex-direction: row-reverse;
+            background-color: var(--dark-grey);
+        }
+
+        .showcase-text {
+            flex: 1;
+            padding: 0 5%;
+        }
+
+        .showcase-image-container {
+            flex: 1.5;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .showcase-image {
+            width: 100%;
+            height: 100%;
+            /* ΕΔΩ ΜΠΑΙΝΟΥΝ ΟΙ ΦΩΤΟΓΡΑΦΙΕΣ ΤΩΝ ΠΡΟΪΟΝΤΩΝ */
+            background-size: cover;
+            background-position: center;
+            transition: transform 10s ease; /* Αργό zoom in όταν περνάει το ποντίκι */
+        }
+
+        .showcase-image-container:hover .showcase-image {
+            transform: scale(1.05);
+        }
+
+        /* Τοποθέτηση των φωτογραφιών μέσω CSS classes */
+        .img-ecu { background-image: url('ecu_hardware.jpg'); }
+        .img-controllers { background-image: url('controllers.jpg'); }
+
+        /* --- SOFTWARE SECTION (Full Screen) --- */
+        .software-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 5rem 5%;
+            /* ΕΔΩ ΜΠΑΙΝΕΙ ΤΟ SCREENSHOT ΤΟΥ NX-TUNER PRO */
+            background-image: linear-gradient(rgba(3, 3, 3, 0.8), rgba(3, 3, 3, 0.95)), url('nx_tuner_pro_screenshot.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s ease;
+        }
+
+        .software-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .software-section h2 {
+            color: var(--white);
+        }
+
+        .software-section p {
+            max-width: 800px;
+            font-size: 1.2rem;
+            color: var(--white);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 4rem 5%;
+            text-align: center;
+            background-color: var(--black);
+            border-top: 1px solid #111;
+        }
+
+        footer .brand-font {
+            font-size: 1.2rem;
+            color: var(--light-grey);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <!-- Χρησιμοποιώ το λογότυπό σου (π.χ. το start_logo.png που είναι διάφανο) -->
+        <a href="#"><img src="start_logo.png" alt="NX Tuning Tech" class="logo"></a>
+        <div class="nav-links">
+            <a href="#hardware">ECU</a>
+            <a href="#accessories">Accessories</a>
+            <a href="#software">Software</a>
+        </div>
+    </nav>
+
+    <!-- 1. HERO SECTION (Εντυπωσιακή Είσοδος) -->
+    <section class="hero">
+        <h1>BEYOND LIMITS</h1>
+        <div class="subtitle">Engineered for Absolute Performance</div>
+    </section>
+
+    <!-- 2. Ο ΕΓΚΕΦΑΛΟΣ (Hardware) -->
+    <section id="hardware" class="showcase">
+        <div class="showcase-text">
+            <h2>THE NX CORE</h2>
+            <p>Designed without compromise. The NX Standalone ECU features state-of-the-art multi-layer PCB architecture, encased in ultra-durable, custom-manufactured ASA enclosures built for extreme thermal and mechanical resistance. Raw processing power meets motorsport reliability.</p>
+        </div>
+        <div class="showcase-image-container">
+            <!-- Άλλαξε το αρχείο 'ecu_hardware.jpg' στο CSS (γραμμή 138) -->
+            <div class="showcase-image img-ecu"></div>
+        </div>
+    </section>
+
+    <!-- 3. CONTROLLERS & ΠΕΡΙΦΕΡΕΙΑΚΑ -->
+    <section id="accessories" class="showcase reverse">
+        <div class="showcase-text">
+            <h2>PRECISION MODULES</h2>
+            <p>Seamless integration with your powertrain. From advanced CAN-bus telemetry controllers to dedicated data loggers, every accessory is rigorously tested to perform flawlessly under high-stress racing conditions. Expand your capabilities infinitely.</p>
+        </div>
+        <div class="showcase-image-container">
+            <!-- Άλλαξε το αρχείο 'controllers.jpg' στο CSS (γραμμή 139) -->
+            <div class="showcase-image img-controllers"></div>
+        </div>
+    </section>
+
+    <!-- 4. ΤΟ ΛΟΓΙΣΜΙΚΟ (NX-Tuner Pro) -->
+    <section id="software" class="software-section">
+        <h2>NX-TUNER PRO</h2>
+        <p>The bridge between raw hardware capability and ultimate performance. A desktop calibration environment offering zero-lag telemetry, 3D OpenGL map rendering, and AI-assisted engine tuning algorithms. The interface of champions.</p>
+        <!-- Η εικόνα μπαίνει ως φόντο (Άλλαξε το 'nx_tuner_pro_screenshot.jpg' στο CSS, γραμμή 151) -->
+    </section>
+
+    <footer>
+        <span class="brand-font">NX TUNING TECH</span>
+        <p style="font-size: 0.8rem;">&copy; 2026. All rights reserved.</p>
+    </footer>
+
+    <!-- JAVASCRIPT ΓΙΑ ΤΑ ANIMATIONS ΕΜΦΑΝΙΣΗΣ -->
+    <script>
+        // Αλλάζει το φόντο του μενού όταν σκρολάρεις
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(3, 3, 3, 0.95)';
+            } else {
+                navbar.style.background = 'linear-gradient(to bottom, rgba(3,3,3,0.9) 0%, rgba(3,3,3,0) 100%)';
+            }
+        });
+
+        // Εμφανίζει τις ενότητες με fade-in καθώς σκρολάρεις προς τα κάτω
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.2 }); // Ενεργοποιείται όταν το 20% της ενότητας μπει στην οθόνη
+
+        document.querySelectorAll('.showcase, .software-section').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
