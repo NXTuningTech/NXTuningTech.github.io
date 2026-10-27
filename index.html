@@ -32,16 +32,13 @@ h3{font-size:clamp(1rem,1.8vw,1.35rem)}
 .mono{font-family:var(--mono)}
 .dim{color:var(--dim)}
 
-/* cursor (fine pointers only) */
-.cur,.cur-dot{position:fixed;top:0;left:0;pointer-events:none;z-index:999;opacity:0;transition:opacity .3s}
-.cur{width:38px;height:38px;margin:-19px 0 0 -19px;border:1px solid rgba(109,245,39,.55);border-radius:50%;
-  transition:width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),background .35s,opacity .3s}
-.cur::before,.cur::after{content:"";position:absolute;background:rgba(109,245,39,.7)}
-.cur::before{left:50%;top:-6px;width:1px;height:6px}
-.cur::after{top:50%;left:-6px;height:1px;width:6px}
-.cur-dot{width:4px;height:4px;margin:-2px 0 0 -2px;background:var(--g);border-radius:50%}
-.cur.hot{width:68px;height:68px;margin:-34px 0 0 -34px;background:rgba(109,245,39,.06)}
-@media (hover:hover) and (pointer:fine){body.has-cur,body.has-cur a,body.has-cur button{cursor:none}.has-cur .cur,.has-cur .cur-dot{opacity:1}}
+/* cursor: arrow that points where you move (fine pointers only) */
+.ptr{position:fixed;top:0;left:0;width:0;height:0;z-index:999;pointer-events:none;opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 7px rgba(109,245,39,.85))}
+.ptr i{position:absolute;left:-13px;top:-9px;width:26px;height:18px;background:var(--g);clip-path:polygon(0 0,100% 50%,0 100%,24% 50%);transition:transform .35s var(--ease),background .25s}
+.ptr b{position:absolute;right:11px;top:-1px;height:2px;width:var(--t,0px);background:linear-gradient(90deg,transparent,var(--g))}
+.ptr.hot i{transform:scale(1.55);background:#fff}
+.ptr.dn i{transform:scale(.8)}
+@media (hover:hover) and (pointer:fine){.has-cur,.has-cur *{cursor:none!important}.has-cur .ptr{opacity:1}}
 
 /* nav */
 nav{position:fixed;inset:0 0 auto 0;z-index:100;transition:background .5s,backdrop-filter .5s,border-color .5s,padding .5s;border-bottom:1px solid transparent;padding:1.4rem 0}
@@ -257,10 +254,62 @@ nav.solid .logo img{height:38px}
 .tools{margin-top:.9rem}
 .tools input{width:120px}
 .hint{font:.7rem var(--mono);color:var(--dim);margin-top:.8rem}
+
+/* ---- crown upgrade ---- */
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false}
+.pre{position:fixed;inset:0;z-index:1000;background:#000;display:grid;place-content:center;justify-items:center;gap:1.6rem;animation:preOut .9s 1.15s var(--ease) forwards}
+.pre img{width:min(320px,62vw);animation:preIn .9s var(--ease) both;filter:drop-shadow(0 0 30px rgba(109,245,39,.35))}
+.pre i{width:min(320px,62vw);height:2px;background:rgba(255,255,255,.1);position:relative;overflow:hidden}
+.pre i::after{content:"";position:absolute;inset:0;background:var(--g);box-shadow:0 0 14px var(--g);transform:translateX(-100%);animation:bar 1.1s var(--ease) forwards}
+@keyframes preIn{from{opacity:0;transform:scale(.9)}}
+@keyframes bar{to{transform:none}}
+@keyframes preOut{to{opacity:0;visibility:hidden;clip-path:inset(0 0 100% 0)}}
+.prog{position:fixed;top:0;left:0;width:100%;height:3px;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--g2),var(--g),#fff);z-index:200;box-shadow:0 0 14px var(--g)}
+body::after{content:"";position:fixed;inset:0;z-index:150;pointer-events:none;opacity:.06;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hero h1 span:nth-child(1) b{animation-delay:1.2s}
+.hero h1 span:nth-child(2) b{background:linear-gradient(100deg,var(--g) 30%,#fff 45%,var(--g) 60%) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:rise 1.4s 1.38s var(--ease) forwards,shine 5s 3.2s linear infinite;filter:drop-shadow(0 0 28px rgba(109,245,39,.35))}
+@keyframes shine{to{background-position:-250% 0}}
+.fade-in{animation-delay:2.1s}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(120% 90% at 50% 40%,transparent 38%,#000 100%)}
+.hero::before{content:"SCROLL";position:absolute;left:50%;bottom:1rem;transform:translateX(-50%);font:.6rem var(--mono);letter-spacing:.45em;color:var(--dim);animation:cue 2.2s ease-in-out infinite}
+@keyframes cue{50%{opacity:.25;transform:translate(-50%,6px)}}
+.marq{overflow:hidden;border-block:1px solid var(--line);background:#050606}
+.mt{display:flex;width:max-content;animation:mq 45s linear infinite}
+.mt span{font:700 .78rem var(--display);letter-spacing:.14em;padding:1.1rem 2.2rem;color:var(--dim);white-space:nowrap;transition:color .3s}
+.mt span::after{content:"/";color:var(--g);margin-left:2.2rem}
+.mt span:hover{color:var(--g)}
+@keyframes mq{to{transform:translateX(-50%)}}
+.pad::before{content:attr(data-n);position:absolute;top:1.5rem;right:2%;font:700 clamp(7rem,22vw,19rem)/1 var(--display);color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.05);pointer-events:none;z-index:0}
+.pad>.wrap{position:relative;z-index:1}
+.eyebrow{display:block;font:.72rem var(--mono);letter-spacing:.22em;color:var(--g);margin-bottom:1.1rem;text-transform:uppercase}
+.eyebrow::before{content:"";display:inline-block;width:36px;height:1px;background:var(--g);vertical-align:middle;margin-right:.9rem}
+h2{background:linear-gradient(180deg,#fff 20%,#9aa2ad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sw-grid>div,.stat{position:relative;overflow:hidden}
+.sw-grid>div::before,.stat::before{content:"";position:absolute;inset:0;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(109,245,39,.15),transparent 45%);opacity:0;transition:opacity .4s;pointer-events:none}
+.sw-grid>div:hover::before,.stat:hover::before{opacity:1}
+.btn{position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;top:0;left:-120%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);transition:left .8s var(--ease)}
+.btn:hover::after{left:140%}
+.tag::after{content:attr(data-l)}
+.tag{font-size:.68rem;letter-spacing:.18em;color:var(--g);text-shadow:0 0 12px rgba(109,245,39,.6)}
+.screen::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:10px;padding:1px;
+  background:conic-gradient(from var(--a),transparent 0 72%,var(--g) 88%,transparent 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude;animation:ang 6s linear infinite}
+@keyframes ang{to{--a:360deg}}
+.play{animation:ring 2.4s ease-out infinite}
+.video:hover .play{animation:none}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(109,245,39,.45)}100%{box-shadow:0 0 0 40px rgba(109,245,39,0)}}
+.links a.act{color:var(--text)}.links a.act::after{transform:scaleX(1);transform-origin:left}
+footer{position:relative;overflow:hidden}
+footer::before{content:"NX";position:absolute;right:-2%;bottom:-22%;font:700 clamp(12rem,34vw,30rem)/1 var(--display);color:transparent;-webkit-text-stroke:1px rgba(109,245,39,.13);pointer-events:none}
+footer .wrap{position:relative}
+@media(prefers-reduced-motion:reduce){.pre{display:none}.mt,.play,.screen::before,.hero::before{animation:none}.hero h1 span:nth-child(2) b{animation:none;transform:none}}
 </style>
 </head>
 <body>
-<div class="cur" aria-hidden="true"></div><div class="cur-dot" aria-hidden="true"></div>
+<div class="pre" aria-hidden="true"><img src="logo.png" alt=""><i></i></div>
+<div class="prog" aria-hidden="true"></div>
+<div class="ptr" aria-hidden="true"><b></b><i></i></div>
 
 <nav id="nav">
   <div class="wrap nav-in">
@@ -286,7 +335,7 @@ nav.solid .logo img{height:38px}
   <canvas id="fx" aria-hidden="true"></canvas>
   <div class="wrap">
     <div class="shift" id="shift" aria-hidden="true"><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="r"></i><i class="r"></i><i class="r"></i><i class="r"></i><i class="r"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i></div>
-    <h1 aria-label="Unleash the apex"><span><b>PERFORMANCE</b></span><span><b>WITHOUT MERCY</b></span></h1>
+    <h1 aria-label="Performance without mercy"><span><b>PERFORMANCE</b></span><span><b>WITHOUT MERCY</b></span></h1>
     <div class="hero-foot fade-in">
       <div>
         <p>Our custom standalone ECU (Minimum Version) running 100% custom firmware at &gt;600,000 loops per second, paired with NX-Tuner Pro software and AI Co-Tuner. Designed and built in-house.</p>
@@ -303,10 +352,12 @@ nav.solid .logo img{height:38px}
 </section>
 
 <div class="checker" aria-hidden="true"></div>
+<div class="marq" aria-hidden="true"><div class="mt"><span>600,000+ LOOPS / SEC</span><span>&gt;50 HZ LIVE DATA</span><span>16x16 MAPS</span><span>AI CO-TUNER</span><span>LAUNCH CONTROL</span><span>ANTILAG</span><span>TRACTION CONTROL</span><span>NOS INJECTION</span><span>100% CUSTOM FIRMWARE</span><span>600,000+ LOOPS / SEC</span><span>&gt;50 HZ LIVE DATA</span><span>16x16 MAPS</span><span>AI CO-TUNER</span><span>LAUNCH CONTROL</span><span>ANTILAG</span><span>TRACTION CONTROL</span><span>NOS INJECTION</span><span>100% CUSTOM FIRMWARE</span></div></div>
 <!-- HARDWARE 1: ECU MINIMUM VERSION -->
-<section id="hardware" class="pad">
+<section id="hardware" class="pad" data-n="01">
   <div class="wrap split">
     <div class="copy rv">
+      <span class="eyebrow">01 / The ECU</span>
       <h2>NX-ECU Minimum</h2>
       <p>The Minimum Version of our standalone ECU delivers deterministic engine control powered by 100% custom firmware executing over 600,000 loops per second. Featuring 16x16 fuel and ignition maps, closed-loop idle, and &gt;50Hz PC live data and logging.</p>
       <ul class="specs">
@@ -317,14 +368,15 @@ nav.solid .logo img{height:38px}
         <li><span>PC Telemetry</span><span>&gt;50Hz PC Live Data &amp; Logging</span></li>
       </ul>
     </div>
-    <div class="media rv" style="--d:.15s"><div class="ph p1" data-speed=".06" role="img" aria-label="NX-ECU Minimum Version circuit board"></div><span class="tag"></span></div>
+    <div class="media rv" style="--d:.15s"><div class="ph p1" data-speed=".06" role="img" aria-label="NX-ECU Minimum Version circuit board"></div><span class="tag" data-l="NX-ECU // MINIMUM"></span></div>
   </div>
 </section>
 
 <!-- HARDWARE 2: ECU PCB & MOTORSPORT FEATURES -->
-<section class="pad hw-2">
+<section class="pad hw-2" data-n="02">
   <div class="wrap split flip">
     <div class="copy rv">
+      <span class="eyebrow">02 / Race hardware</span>
       <h2>Custom PCB &amp; Race Hardware</h2>
       <p>Engineered around a custom noise-isolated PCB layout with protected power stages and clean 0-5V analog signal conditioning for external wideband O2 and knock controllers. Packed with dedicated motorsport strategies and auxiliary outputs straight out of the box.</p>
       <ul class="specs">
@@ -335,14 +387,15 @@ nav.solid .logo img{height:38px}
         <li><span>Aux Outputs</span><span>NOS Injection Out, Thermo Fan, Fuel pump, Idle valve, Shift Light, Light </span></li>
       </ul>
     </div>
-    <div class="media rv" style="--d:.15s"><div class="ph p2" data-speed=".06" role="img" aria-label="NX-ECU PCB and hardware architecture"></div><span class="tag"></span></div>
+    <div class="media rv" style="--d:.15s"><div class="ph p2" data-speed=".06" role="img" aria-label="NX-ECU PCB and hardware architecture"></div><span class="tag" data-l="NX-ECU // RACE I/O"></span></div>
   </div>
 </section>
 
 <div class="kerb" aria-hidden="true"></div>
 <!-- SOFTWARE -->
-<section id="software" class="pad sw">
+<section id="software" class="pad sw" data-n="03">
   <div class="wrap">
+    <span class="eyebrow rv">03 / Software</span>
     <h2 class="rv">NX-Tuner Pro</h2>
     <p class="rv" style="--d:.1s">Custom desktop tuning suite for the NX-ECU featuring live 16x16 3D maps, &gt;50Hz PC live data and logging, Auto Tune, and an integrated AI Co-Tuner.</p>
     <div class="sw-cta rv" style="--d:.15s">
@@ -363,8 +416,9 @@ nav.solid .logo img{height:38px}
 </section>
 
 <!-- MAP STUDIO -->
-<section id="maps" class="pad maps">
+<section id="maps" class="pad maps" data-n="04">
   <div class="wrap">
+    <span class="eyebrow rv">04 / Free tool</span>
     <h2 class="rv">Base Map Generator</h2>
     <p class="lead rv">Generate 16x16 base VE, ignition and AFR maps from your engine parameters, edit them in 2D or inspect them in 3D, then export straight to TunerStudio.</p>
     <div class="ms rv">
@@ -387,9 +441,10 @@ nav.solid .logo img{height:38px}
 </section>
 <div class="kerb" aria-hidden="true"></div>
 <!-- LAB -->
-<section id="lab" class="pad lab">
+<section id="lab" class="pad lab" data-n="05">
   <div class="wrap">
     <div class="lab-head rv">
+      <span class="eyebrow">05 / R&amp;D</span>
       <h2>The Lab</h2>
       <p>Every custom PCB revision, firmware build and engine test gets pushed to the limit. Follow the development of our standalone ECU as it happens.</p>
     </div>
@@ -438,10 +493,13 @@ $$('a',links).forEach(a=>a.addEventListener('click',()=>{links.classList.remove(
 /* cursor */
 if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!reduce){
   document.body.classList.add('has-cur');
-  const c=$('.cur'),d=$('.cur-dot');let x=innerWidth/2,y=innerHeight/2,cx=x,cy=y;
-  addEventListener('mousemove',e=>{x=e.clientX;y=e.clientY;d.style.transform=`translate(${x}px,${y}px)`},{passive:true});
-  (function loop(){cx+=(x-cx)*.16;cy+=(y-cy)*.16;c.style.transform=`translate(${cx}px,${cy}px)`;requestAnimationFrame(loop)})();
-  $$('a,button,.media,.screen').forEach(el=>{el.addEventListener('mouseenter',()=>c.classList.add('hot'));el.addEventListener('mouseleave',()=>c.classList.remove('hot'))});
+  const c=$('.ptr');let x=innerWidth/2,y=innerHeight/2,rx=x,ry=y,ang=-2.36,sp=0;
+  addEventListener('mousemove',e=>{x=e.clientX;y=e.clientY},{passive:true});
+  addEventListener('mousedown',()=>c.classList.add('dn'));addEventListener('mouseup',()=>c.classList.remove('dn'));
+  (function loop(){const px=rx,py=ry;rx+=(x-rx)*.3;ry+=(y-ry)*.3;const dx=rx-px,dy=ry-py,v=Math.hypot(dx,dy);
+    if(v>.8){let d=Math.atan2(dy,dx)-ang;d=Math.atan2(Math.sin(d),Math.cos(d));ang+=d*.22}
+    sp+=(v-sp)*.18;c.style.transform=`translate(${rx}px,${ry}px) rotate(${ang}rad)`;c.style.setProperty('--t',Math.min(110,sp*5)+'px');requestAnimationFrame(loop)})();
+  document.addEventListener('mouseover',e=>{c.classList.toggle('hot',!!e.target.closest('a,button,.media,.screen,.video,input,select,td'))});
 }
 
 /* reveal + counters */
@@ -625,6 +683,17 @@ $('#exp').addEventListener('click',()=>{
 });
 
 ['ve','spk','afr'].forEach(gen);form();renderTable();
+})();
+</script>
+<script>
+(()=>{
+const pr=document.querySelector('.prog');
+const upd=()=>{const h=document.documentElement,m=h.scrollHeight-innerHeight;pr.style.transform=`scaleX(${m>0?Math.min(1,scrollY/m):0})`};
+addEventListener('scroll',upd,{passive:true});upd();
+document.querySelectorAll('.sw-grid>div,.stat').forEach(el=>el.addEventListener('pointermove',e=>{const r=el.getBoundingClientRect();el.style.setProperty('--mx',(e.clientX-r.left)+'px');el.style.setProperty('--my',(e.clientY-r.top)+'px')}));
+const links=[...document.querySelectorAll('.links a[href^="#"]')];
+const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'});
+links.forEach(a=>{const t=document.querySelector(a.getAttribute('href'));t&&spy.observe(t)});
 })();
 </script>
 </body>
