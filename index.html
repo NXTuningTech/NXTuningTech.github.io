@@ -1,322 +1,631 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NX Tuning Tech | The Peak of Engine Management</title>
-    <!-- Φόρτωση Premium Γραμματοσειρών από την Google -->
-    <!-- Χρησιμοποιούμε τη "Syncopate" για μοντέρνο, απλωμένο τίτλο και τη "Montserrat" για καθαρό κείμενο -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Βασικές Μεταβλητές Χρωμάτων */
-        :root {
-            --black: #030303;
-            --dark-grey: #0a0a0a;
-            --light-grey: #777777;
-            --white: #ffffff;
-            --accent: #4DA8DA; /* Το γαλάζιο του λογισμικού, χρησιμοποιείται διακριτικά */
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NX Tuning Tech | Custom Standalone ECU & Tuning Software</title>
+<meta name="description" content="NX-ECU Minimum Version standalone engine management with 100% custom firmware (>600,000 loops/sec) and NX-Tuner Pro desktop tuning software by NX Tuning Tech.">
+<link rel="icon" href="logo2.png">
+<meta name="theme-color" content="#030303">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Space+Mono:wght@400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030303; --panel:#0a0b0d; --panel-2:#101216; --line:rgba(255,255,255,.08);
+  --text:#e9ebee; --dim:#8b9099; --g:#6df527;--g2:#1f9a2e; 
+  --display:'Syncopate',Impact,sans-serif; --mono:'Space Mono',ui-monospace,monospace; --body:'Inter',system-ui,sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{background:var(--bg);color:var(--text);font:300 1rem/1.7 var(--body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:1px solid var(--g);outline-offset:4px}
+::selection{background:var(--g);color:#000}
+.wrap{width:min(1240px,100% - 2.5rem);margin-inline:auto}
+section{position:relative}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.08;letter-spacing:.02em;text-transform:uppercase}
+h2{font-size:clamp(1.6rem,4.2vw,3.2rem)}
+h3{font-size:clamp(1rem,1.8vw,1.35rem)}
+.mono{font-family:var(--mono)}
+.dim{color:var(--dim)}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* cursor (fine pointers only) */
+.cur,.cur-dot{position:fixed;top:0;left:0;pointer-events:none;z-index:999;opacity:0;transition:opacity .3s}
+.cur{width:38px;height:38px;margin:-19px 0 0 -19px;border:1px solid rgba(109,245,39,.55);border-radius:50%;
+  transition:width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),background .35s,opacity .3s}
+.cur::before,.cur::after{content:"";position:absolute;background:rgba(109,245,39,.7)}
+.cur::before{left:50%;top:-6px;width:1px;height:6px}
+.cur::after{top:50%;left:-6px;height:1px;width:6px}
+.cur-dot{width:4px;height:4px;margin:-2px 0 0 -2px;background:var(--g);border-radius:50%}
+.cur.hot{width:68px;height:68px;margin:-34px 0 0 -34px;background:rgba(109,245,39,.06)}
+@media (hover:hover) and (pointer:fine){body.has-cur,body.has-cur a,body.has-cur button{cursor:none}.has-cur .cur,.has-cur .cur-dot{opacity:1}}
 
-        body {
-            background-color: var(--black);
-            color: var(--white);
-            font-family: 'Montserrat', sans-serif;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
+/* nav */
+nav{position:fixed;inset:0 0 auto 0;z-index:100;transition:background .5s,backdrop-filter .5s,border-color .5s,padding .5s;border-bottom:1px solid transparent;padding:1.4rem 0}
+nav.solid{background:rgba(6,7,9,.55);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);border-color:var(--line);padding:.8rem 0}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.logo{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.12em;display:flex;align-items:center;gap:.7rem}
+.logo i{width:9px;height:9px;background:var(--g);box-shadow:0 0 14px var(--g);border-radius:50%;animation:pulse 2.4s infinite}
+@keyframes pulse{50%{opacity:.35;box-shadow:0 0 4px var(--g)}}
+.links{display:flex;gap:2.4rem;list-style:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.06em}
+.links a{color:var(--dim);position:relative;padding:.3rem 0;transition:color .3s}
+.links a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--g);transform:scaleX(0);transform-origin:right;transition:transform .5s var(--ease)}
+.links a:hover{color:var(--text)}
+.links a:hover::after{transform:scaleX(1);transform-origin:left}
+.btn{display:inline-flex;align-items:center;gap:.8rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;padding:.9rem 1.5rem;border:1px solid rgba(255,255,255,.18);background:transparent;color:var(--text);transition:border-color .4s,box-shadow .4s,background .4s}
+.btn:hover{border-color:var(--g);box-shadow:0 0 28px -6px rgba(109,245,39,.55),inset 0 0 18px -10px var(--g);background:rgba(109,245,39,.04)}
+.burger{display:none;background:none;border:0;color:var(--text);font-family:var(--mono);font-size:.8rem;padding:.4rem}
+@media(max-width:820px){
+  .burger{display:block}
+  .links{position:fixed;inset:0 0 0 auto;width:min(78vw,320px);background:rgba(3,3,3,.96);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);flex-direction:column;justify-content:center;padding:2rem;transform:translateX(100%);transition:transform .6s var(--ease);border-left:1px solid var(--line);font-size:1rem}
+  .links.open{transform:none}
+  nav .btn{display:none}
+}
 
-        /* Τυπογραφία */
-        h1, h2, h3, .brand-font {
-            font-family: 'Syncopate', sans-serif;
-            text-transform: uppercase;
-        }
+/* hero */
+.hero{min-height:100vh;min-height:100svh;display:grid;align-items:end;overflow:hidden;isolation:isolate;padding:8rem 0 4rem}
+.ph{background-color:var(--panel);background-size:cover;background-position:center}
+.hero-bg{position:absolute;inset:-8% 0;z-index:-3;background:
+  radial-gradient(60% 50% at 70% 40%,rgba(31,154,46,.16),transparent 70%),
+  radial-gradient(50% 45% at 30% 60%,rgba(109,245,39,.10),transparent 70%),
+  linear-gradient(180deg,rgba(3,3,3,.55),var(--bg) 96%),
+  url('ecu_hero.jpg') center/cover,#07080a;will-change:transform}
+.grid{position:absolute;inset:0;z-index:-2;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:72px 72px;
+  mask-image:radial-gradient(70% 70% at 55% 45%,#000 20%,transparent 78%);-webkit-mask-image:radial-gradient(70% 70% at 55% 45%,#000 20%,transparent 78%);animation:drift 24s linear infinite}
+@keyframes drift{to{background-position:72px 72px}}
+#fx{position:absolute;inset:0;z-index:-1;width:100%;height:100%}
+.scan{position:absolute;left:0;right:0;height:1px;top:0;z-index:-1;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.5;animation:scan 7s var(--ease) infinite}
+@keyframes scan{0%{top:12%;opacity:0}15%{opacity:.5}85%{opacity:.5}100%{top:92%;opacity:0}}
+.hero h1{font-size:clamp(2.3rem,8.6vw,7.4rem);max-width:12ch;letter-spacing:.01em}
+.hero h1 span{display:block;overflow:hidden}
+.hero h1 span b{display:block;font-weight:700;transform:translateY(105%);animation:rise 1.4s var(--ease) forwards}
+.hero h1 span:nth-child(2) b{animation-delay:.18s;color:var(--g)}
+@keyframes rise{to{transform:none}}
+.hero-foot{display:flex;flex-wrap:wrap;gap:2rem 4rem;justify-content:space-between;align-items:end;margin-top:3rem}
+.hero p{max-width:44ch;color:var(--dim);font-size:1.05rem}
+.telemetry{font-family:var(--mono);font-size:.74rem;color:var(--dim);display:grid;gap:.35rem;min-width:220px;border-left:1px solid var(--line);padding-left:1.2rem}
+.telemetry b{color:var(--g);font-weight:400}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.8rem}
+.fade-in{opacity:0;animation:fi 1.4s .9s var(--ease) forwards}
+@keyframes fi{to{opacity:1}}
 
-        h2 {
-            font-size: 2.5rem;
-            letter-spacing: 5px;
-            margin-bottom: 1.5rem;
-            font-weight: 400;
-        }
+/* generic section */
+.pad{padding:clamp(5rem,12vw,10rem) 0}
+.split{display:grid;gap:3rem;align-items:center;grid-template-columns:1fr}
+@media(min-width:900px){.split{grid-template-columns:1fr 1fr;gap:6rem}.split.flip .copy{order:2}}
+.copy h2{margin-bottom:1.6rem}
+.copy>p{color:var(--dim);max-width:52ch;margin-bottom:2rem}
+.specs{list-style:none;border-top:1px solid var(--line)}
+.specs li{display:flex;justify-content:space-between;gap:1rem;padding:.85rem 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.8rem}
+.specs li span:first-child{color:var(--dim)}
+.specs li span:last-child{text-align:right}
+.media{position:relative;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+.media .ph{position:absolute;inset:-6%;transition:transform 1.4s var(--ease),filter 1.4s;filter:saturate(.85) brightness(.9);will-change:transform}
+.media:hover .ph{transform:scale(1.07);filter:saturate(1.05) brightness(1.05)}
+.media::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px transparent;transition:box-shadow .6s,background .6s;background:linear-gradient(180deg,transparent 60%,rgba(3,3,3,.7))}
+.media:hover::after{box-shadow:inset 0 0 60px -20px rgba(109,245,39,.55)}
+.tag{position:absolute;left:1rem;bottom:1rem;z-index:2;font-family:var(--mono);font-size:.7rem;color:var(--dim)}
+.p1{background-image:url('ecu_photo_1.JPG'),radial-gradient(70% 60% at 50% 40%,#1a2a30,#07090b 70%),repeating-linear-gradient(45deg,#0c0e11 0 12px,#0a0b0d 12px 24px)}
+.p2{background-image:url('controller_photo_1.png'),radial-gradient(70% 60% at 40% 50%,#241a3a,#07090b 70%),repeating-linear-gradient(-45deg,#0c0e11 0 12px,#0a0b0d 12px 24px)}
+.hw-2{background:linear-gradient(180deg,var(--bg),var(--panel) 40%,var(--bg))}
 
-        p {
-            font-weight: 300;
-            font-size: 1rem;
-            line-height: 2;
-            color: var(--light-grey);
-            letter-spacing: 1px;
-            margin-bottom: 2rem;
-        }
+/* software */
+.sw{background:radial-gradient(60% 50% at 50% 100%,rgba(31,154,46,.12),transparent 70%),var(--bg);text-align:center;overflow:hidden}
+.sw h2{margin:0 auto 1.4rem;max-width:18ch}
+.sw>.wrap>p{color:var(--dim);max-width:56ch;margin:0 auto 2.2rem}
+.sw-cta{margin:0 auto 3.5rem;display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+.screen{position:relative;max-width:1080px;margin:0 auto;aspect-ratio:16/9;border:1px solid rgba(255,255,255,.14);border-radius:10px;overflow:hidden;background:#05070a;
+  box-shadow:0 0 0 1px rgba(109,245,39,.05),0 40px 120px -30px rgba(109,245,39,.28),0 0 160px -40px rgba(31,154,46,.45);transform:perspective(1600px) rotateX(5deg);transition:transform 1.2s var(--ease),box-shadow 1.2s}
+.screen:hover{transform:perspective(1600px) rotateX(0);box-shadow:0 0 0 1px rgba(109,245,39,.25),0 40px 140px -30px rgba(109,245,39,.5),0 0 200px -40px rgba(31,154,46,.6)}
+.screen .ph{position:absolute;inset:0;background-image:url('nx_tuner_screenshot.png'),linear-gradient(135deg,#0a1218,#07070d)}
+.screen .bar{position:absolute;top:0;left:0;right:0;height:30px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 12px;z-index:2}
+.screen .bar i{width:8px;height:8px;border-radius:50%;background:#2a2d33}
+.screen .bar span{margin-left:auto;font-family:var(--mono);font-size:.65rem;color:var(--dim)}
+#map{position:absolute;inset:30px 0 0 0;width:100%;height:calc(100% - 30px)}
+.sw-grid{display:grid;gap:1px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:5rem;background:var(--line);border:1px solid var(--line);text-align:left}
+.sw-grid div{background:var(--bg);padding:2rem 1.6rem;transition:background .5s}
+.sw-grid div:hover{background:var(--panel-2)}
+.sw-grid h3{margin-bottom:.8rem;font-size:.95rem}
+.sw-grid p{color:var(--dim);font-size:.9rem}
 
-        /* --- NAVIGATION --- */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 2rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            background: linear-gradient(to bottom, rgba(3,3,3,0.9) 0%, rgba(3,3,3,0) 100%);
-            transition: background 0.3s ease;
-        }
+/* lab */
+.lab .split{align-items:stretch}
+.video{position:relative;aspect-ratio:16/10;overflow:hidden;border:1px solid var(--line);display:grid;place-items:center;isolation:isolate}
+.video .ph{position:absolute;inset:0;z-index:-1;background-image:url('lab_video_thumb.jpg'),radial-gradient(60% 60% at 60% 40%,#1c1630,#06070a 75%);transition:transform 1.4s var(--ease),filter 1s;filter:brightness(.75)}
+.video:hover .ph{transform:scale(1.05);filter:brightness(1)}
+.play{width:92px;height:92px;border-radius:50%;border:1px solid rgba(255,255,255,.4);display:grid;place-items:center;background:rgba(255,255,255,.04);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:transform .6s var(--ease),border-color .4s,box-shadow .6s;position:relative}
+.play::before{content:"";border-left:18px solid #fff;border-block:11px solid transparent;margin-left:5px}
+.play::after{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px solid rgba(109,245,39,.0);transition:inset .8s var(--ease),border-color .6s}
+.video:hover .play{transform:scale(1.1);border-color:var(--g);box-shadow:0 0 50px -4px rgba(109,245,39,.6)}
+.video:hover .play::after{inset:-22px;border-color:rgba(109,245,39,.35)}
+.video .cap{position:absolute;left:1.2rem;bottom:1rem;font-family:var(--mono);font-size:.72rem;color:#c9ccd1}
+.stats{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);align-content:stretch}
+.stat{background:var(--bg);padding:1.8rem 1.6rem;display:flex;flex-direction:column;justify-content:center;transition:background .5s}
+.stat:hover{background:var(--panel-2)}
+.stat strong{font-family:var(--display);font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:700;line-height:1}
+.stat span{font-family:var(--mono);font-size:.74rem;color:var(--dim);margin-top:.6rem}
+.lab-head{margin-bottom:3.5rem;max-width:760px}
+.lab-head p{color:var(--dim);margin-top:1.4rem;max-width:56ch}
+@media(min-width:900px){.lab .split{grid-template-columns:1.7fr 1fr;gap:2rem}}
 
-        .logo {
-            width: 150px; /* Μέγεθος του λογοτύπου σου (logo.jpg / start_logo.png) */
-            height: auto;
-        }
+/* footer */
+footer{border-top:1px solid var(--line);padding:4rem 0 2.4rem;font-family:var(--mono);font-size:.82rem;color:var(--dim);background:#020202}
+.term{max-width:760px;line-height:2}
+.term .p{color:var(--g)}
+.term .v{color:var(--g2)}
+.term a{color:var(--text);border-bottom:1px solid transparent;transition:border-color .3s,color .3s}
+.term a:hover{color:var(--g);border-color:var(--g)}
+.caret{display:inline-block;width:8px;height:1em;background:var(--g);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.legal{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;margin-top:3.5rem;padding-top:1.6rem;border-top:1px solid var(--line);font-size:.72rem}
 
-        .nav-links {
-            display: flex;
-            gap: 3rem;
-        }
+/* reveal */
+.rv{opacity:0;transform:translateY(34px);transition:opacity 1.2s var(--ease),transform 1.2s var(--ease);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .rv{opacity:1;transform:none}.hero h1 span b{transform:none}.fade-in{opacity:1}html{scroll-behavior:auto}
+}
 
-        .nav-links a {
-            color: var(--white);
-            text-decoration: none;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            transition: color 0.3s ease;
-        }
+/* ---- motorsport x deep space ---- */
+.btn{border:0;border-left:2px solid var(--g);background:rgba(255,255,255,.07);clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);padding:.9rem 2rem}
+.btn:hover{box-shadow:none;background:linear-gradient(90deg,rgba(109,245,39,.3),rgba(109,245,39,.22))}
+h2::after{content:"";display:block;width:70px;height:4px;background:var(--g);transform:skewX(-35deg);margin-top:1.3rem;box-shadow:0 0 18px rgba(109,245,39,.6)}
+.sw h2::after{margin-inline:auto}
+.hero h1{transform:skewX(-7deg);transform-origin:left bottom}
+.hero-bg{background:
+  radial-gradient(50% 40% at 78% 30%,rgba(31,154,46,.22),transparent 70%),
+  radial-gradient(35% 30% at 15% 20%,rgba(109,245,39,.12),transparent 70%),
+  radial-gradient(30% 25% at 90% 75%,rgba(109,245,39,.10),transparent 70%),
+  linear-gradient(180deg,rgba(3,3,3,.5),var(--bg) 96%),url('ecu_hero.jpg') center/cover,#04050a}
+.stripes{position:absolute;z-index:-2;top:-10%;right:6%;width:200px;height:130%;display:flex;gap:18px;transform:skewX(-22deg);opacity:.5;pointer-events:none}
+.stripes i{flex:1;background:linear-gradient(180deg,transparent,rgba(109,245,39,.55) 40%,rgba(109,245,39,.08))}
+.stripes i+i{flex:.35;background:linear-gradient(180deg,transparent,rgba(255,255,255,.4) 40%,rgba(255,255,255,.04))}
+.shift{display:flex;gap:6px;margin-bottom:2.2rem;max-width:520px;transform:skewX(-14deg)}
+.shift i{flex:1;height:10px;border-radius:2px;background:#15171b;transition:background .08s,box-shadow .08s}
+.shift i.on.g{background:#6df527;box-shadow:0 0 14px #6df527}
+.shift i.on.r{background:#fff;box-shadow:0 0 14px #fff}
+.shift i.on.b{background:#b6ff8a;box-shadow:0 0 16px #b6ff8a}
+.telemetry{border-left:2px solid var(--g)}
+.telemetry b{color:var(--text)}
+.checker{height:28px;background:repeating-conic-gradient(rgba(255,255,255,.9) 0 25%,#000 0 50%) 0 0/14px 14px;opacity:.16;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask-image:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+.hw-2{background:linear-gradient(180deg,var(--bg),transparent 25%,transparent 75%,var(--bg)),
+  linear-gradient(27deg,#0b0c0e 5px,transparent 5px) 0 5px,linear-gradient(207deg,#0b0c0e 5px,transparent 5px) 10px 0,
+  linear-gradient(27deg,#15171b 5px,transparent 5px) 0 10px,linear-gradient(207deg,#15171b 5px,transparent 5px) 10px 5px,
+  linear-gradient(90deg,#08090b 10px,transparent 10px),linear-gradient(#0e1013 25%,#0a0b0d 25%,#0a0b0d 50%,transparent 50%,transparent 75%,#12141a 75%,#12141a);
+  background-color:#0a0b0d;background-size:auto,20px 20px,20px 20px,20px 20px,20px 20px,20px 20px,20px 20px}
+.media{clip-path:polygon(0 0,calc(100% - 36px) 0,100% 36px,100% 100%,36px 100%,0 calc(100% - 36px))}
+.media::before{content:"";position:absolute;z-index:2;top:14px;left:14px;width:26px;height:26px;border-top:2px solid var(--g);border-left:2px solid var(--g)}
+.tag{color:var(--g)}
+.specs li span:last-child{color:var(--text)}
+.sw{background:radial-gradient(60% 50% at 50% 100%,rgba(31,154,46,.18),transparent 70%),radial-gradient(40% 30% at 85% 10%,rgba(109,245,39,.08),transparent 70%),var(--bg)}
+.sw .wrap{position:relative;z-index:1}
+.screen{border-top:2px solid var(--g)}
+.stat strong{background:linear-gradient(180deg,#fff,#9aa4b2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat{border-left:2px solid var(--g)}
+footer{background:linear-gradient(180deg,#020203,#05030b)}
+@media(max-width:700px){.stripes{display:none}}
 
-        .nav-links a:hover {
-            color: var(--accent);
-        }
+/* ---- race theme, logo palette ---- */
+.logo img{height:46px;width:auto;filter:drop-shadow(0 0 12px rgba(109,245,39,.25));transition:filter .4s,transform .4s var(--ease)}
+.logo:hover img{filter:drop-shadow(0 0 18px rgba(109,245,39,.6));transform:scale(1.04)}
+nav.solid .logo img{height:38px}
+.hero-bg{background:
+  radial-gradient(55% 45% at 75% 35%,rgba(109,245,39,.14),transparent 70%),
+  linear-gradient(180deg,rgba(3,3,3,.45),var(--bg) 96%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' fill='none' stroke='%231f9a2e' stroke-opacity='.5' stroke-width='1.5'%3E%3Cpath d='M0 60h70l20 20h60'/%3E%3Ccircle cx='160' cy='80' r='5'/%3E%3Cpath d='M200 0v90l-30 30'/%3E%3Cpath d='M40 260v-70l30-30h50'/%3E%3Ccircle cx='125' cy='160' r='5'/%3E%3Cpath d='M260 200h-80l-20 20v40'/%3E%3Ccircle cx='160' cy='224' r='5'/%3E%3C/svg%3E") 0 0/260px 260px,
+  url('ecu_hero.jpg') center/cover,#030303}
+.stripes{opacity:.7}
+.kerb{height:16px;background:repeating-linear-gradient(115deg,var(--g) 0 30px,#f2f2f2 30px 60px);box-shadow:0 0 40px -8px rgba(109,245,39,.5)}
+.checker{height:42px;background:repeating-conic-gradient(#fff 0 25%,#000 0 50%) 0 0/21px 21px;opacity:.22}
+.sw{clip-path:polygon(0 0,100% 3vw,100% 100%,0 calc(100% - 3vw));padding-block:clamp(7rem,14vw,12rem)}
+.telemetry b{color:var(--g)}
+.screen{border-top:3px solid var(--g)}
+.media::before{width:34px;height:34px;border-width:3px}
+.sw-grid div{border-top:2px solid transparent;transition:background .5s,border-color .5s}
+.sw-grid div:hover{border-top-color:var(--g)}
+.btn{background:var(--g);color:#000;border-left:0;font-weight:700}
+.hero-cta .btn+.btn{background:rgba(255,255,255,.08);color:var(--text);border-left:3px solid var(--g);font-weight:400}
+.btn:hover{background:#fff;color:#000}
+.links a:hover{color:var(--g)}
 
-        /* --- HERO SECTION --- */
-        .hero {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            /* ΕΔΩ ΜΠΑΙΝΕΙ Η ΚΕΝΤΡΙΚΗ ΦΩΤΟΓΡΑΦΙΑ */
-            /* Αντικατέστησε το 'hero_image.jpg' με τη δική σου */
-            background-image: linear-gradient(rgba(3, 3, 3, 0.3), rgba(3, 3, 3, 0.9)), url('hero_image.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed; /* Parallax εφέ */
-        }
-
-        .hero h1 {
-            font-size: 4.5rem;
-            font-weight: 700;
-            letter-spacing: 15px;
-            margin-bottom: 1rem;
-            text-shadow: 0 10px 30px rgba(0,0,0,1);
-            animation: fadeInDown 1.5s ease forwards;
-            opacity: 0;
-        }
-
-        .hero .subtitle {
-            font-size: 1.2rem;
-            letter-spacing: 10px;
-            text-transform: uppercase;
-            color: var(--light-grey);
-            animation: fadeInUp 1.5s ease forwards 0.5s;
-            opacity: 0;
-        }
-
-        /* --- SHOWCASE SECTIONS --- */
-        .showcase {
-            display: flex;
-            align-items: center;
-            min-height: 100vh;
-            padding: 0 5%;
-            background-color: var(--black);
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 1s ease; /* Animation εμφάνισης (Fade In) */
-        }
-
-        .showcase.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .showcase.reverse {
-            flex-direction: row-reverse;
-            background-color: var(--dark-grey);
-        }
-
-        .showcase-text {
-            flex: 1;
-            padding: 0 5%;
-        }
-
-        .showcase-image-container {
-            flex: 1.5;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .showcase-image {
-            width: 100%;
-            height: 100%;
-            /* ΕΔΩ ΜΠΑΙΝΟΥΝ ΟΙ ΦΩΤΟΓΡΑΦΙΕΣ ΤΩΝ ΠΡΟΪΟΝΤΩΝ */
-            background-size: cover;
-            background-position: center;
-            transition: transform 10s ease; /* Αργό zoom in όταν περνάει το ποντίκι */
-        }
-
-        .showcase-image-container:hover .showcase-image {
-            transform: scale(1.05);
-        }
-
-        /* Τοποθέτηση των φωτογραφιών μέσω CSS classes */
-        .img-ecu { background-image: url('ecu_hardware.jpg'); }
-        .img-controllers { background-image: url('controllers.jpg'); }
-
-        /* --- SOFTWARE SECTION (Full Screen) --- */
-        .software-section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 5rem 5%;
-            /* ΕΔΩ ΜΠΑΙΝΕΙ ΤΟ SCREENSHOT ΤΟΥ NX-TUNER PRO */
-            background-image: linear-gradient(rgba(3, 3, 3, 0.8), rgba(3, 3, 3, 0.95)), url('nx_tuner_pro_screenshot.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 1s ease;
-        }
-
-        .software-section.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .software-section h2 {
-            color: var(--white);
-        }
-
-        .software-section p {
-            max-width: 800px;
-            font-size: 1.2rem;
-            color: var(--white);
-        }
-
-        /* --- FOOTER --- */
-        footer {
-            padding: 4rem 5%;
-            text-align: center;
-            background-color: var(--black);
-            border-top: 1px solid #111;
-        }
-
-        footer .brand-font {
-            font-size: 1.2rem;
-            color: var(--light-grey);
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+/* ---- map studio ---- */
+.maps{background:linear-gradient(180deg,var(--bg),#060807 50%,var(--bg))}
+.lead{color:var(--dim);max-width:62ch;margin:1.4rem 0 3rem}
+.ms{border:1px solid var(--line);border-top:3px solid var(--g);background:rgba(10,11,13,.85);padding:1.2rem}
+.ms-tabs,.tools{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.ms input,.ms select{background:#0c0d10;border:1px solid rgba(255,255,255,.14);color:var(--text);font:400 .85rem var(--mono);padding:.65rem .8rem;border-radius:0;min-width:0;width:100%}
+.ms input:focus,.ms select:focus{outline:0;border-color:var(--g)}
+.mb{font:400 .76rem var(--mono);background:rgba(255,255,255,.07);color:var(--text);border:0;border-left:2px solid var(--g);padding:.65rem 1rem;transition:background .3s,color .3s}
+.mb:hover,.mb.on{background:var(--g);color:#000}
+.ms-body{display:grid;gap:1.4rem;margin-top:1.2rem}
+@media(min-width:960px){.ms-body{grid-template-columns:290px 1fr}}
+#pf label{display:grid;gap:.3rem;font:.72rem var(--mono);color:var(--dim);margin-bottom:.8rem}
+.tw{overflow:auto;max-height:520px;border:1px solid var(--line);margin-top:.9rem;outline:0}
+.tw:focus-visible{border-color:var(--g)}
+.tw table{border-collapse:collapse;width:100%}
+.tw th{position:sticky;top:0;left:0;background:#16181c;color:var(--text);font:700 .7rem var(--mono);padding:.35rem .5rem;z-index:1;border:1px solid #000}
+.tw td{min-width:46px;height:30px;text-align:center;font:700 .74rem var(--mono);color:#000;border:1px solid rgba(0,0,0,.4);cursor:cell;user-select:none}
+.tw td.sel{outline:2px solid #fff;outline-offset:-2px;filter:brightness(1.18)}
+.tw td[contenteditable=true]{background:#fff!important;user-select:text;outline:2px solid var(--g)}
+#m3d{display:block;width:100%;height:480px;margin-top:.9rem;border:1px solid var(--line);background:radial-gradient(ellipse at 50% 40%,#1a1d21,#050606);cursor:grab;touch-action:none}
+.ms [hidden]{display:none!important}
+.tools{margin-top:.9rem}
+.tools input{width:120px}
+.hint{font:.7rem var(--mono);color:var(--dim);margin-top:.8rem}
+</style>
 </head>
 <body>
+<div class="cur" aria-hidden="true"></div><div class="cur-dot" aria-hidden="true"></div>
 
-    <nav id="navbar">
-        <!-- Χρησιμοποιώ το λογότυπό σου (π.χ. το start_logo.png που είναι διάφανο) -->
-        <a href="#"><img src="start_logo.png" alt="NX Tuning Tech" class="logo"></a>
-        <div class="nav-links">
-            <a href="#hardware">ECU</a>
-            <a href="#accessories">Accessories</a>
-            <a href="#software">Software</a>
+<nav id="nav">
+  <div class="wrap nav-in">
+    <a href="#top" class="logo" aria-label="NX Tuning Tech home"><img src="logo.png" alt="NX Tuning Tech"></a>
+    <ul class="links" id="links">
+      <li><a href="#hardware">NX-ECU</a></li>
+      <li><a href="#software">NX-Tuner Pro</a></li>
+      <li><a href="#maps">Map Studio</a></li>
+      <li><a href="#lab">The Lab</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="https://github.com/NXTuningTech/NX-Tuner_Pro/releases/tag/v1.2" target="_blank" rel="noopener" class="btn">Download v1.2</a>
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="links">MENU</button>
+  </div>
+</nav>
+
+<main id="top">
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" data-speed=".18"></div>
+  <div class="stripes"><i></i><i></i></div>
+  <div class="grid"></div><div class="scan"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="shift" id="shift" aria-hidden="true"><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="r"></i><i class="r"></i><i class="r"></i><i class="r"></i><i class="r"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i></div>
+    <h1 aria-label="Unleash the apex"><span><b>PERFORMANCE</b></span><span><b>WITHOUT MERCY</b></span></h1>
+    <div class="hero-foot fade-in">
+      <div>
+        <p>Our custom standalone ECU (Minimum Version) running 100% custom firmware at &gt;600,000 loops per second, paired with NX-Tuner Pro software and AI Co-Tuner. Designed and built in-house.</p>
+        <div class="hero-cta"><a class="btn" href="#hardware">Explore the ECU</a><a class="btn" href="#software">NX-Tuner Pro v1.2</a></div>
+      </div>
+      <div class="telemetry" aria-hidden="true">
+        <span>RPM <b id="t-rpm">0000</b></span>
+        <span>MAP <b id="t-map">000</b> kPa</span>
+        <span>AFR <b id="t-afr">00.0</b></span>
+        <span>IGN <b id="t-ign">00.0</b>° BTDC</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="checker" aria-hidden="true"></div>
+<!-- HARDWARE 1: ECU MINIMUM VERSION -->
+<section id="hardware" class="pad">
+  <div class="wrap split">
+    <div class="copy rv">
+      <h2>NX-ECU Minimum</h2>
+      <p>The Minimum Version of our standalone ECU delivers deterministic engine control powered by 100% custom firmware executing over 600,000 loops per second. Featuring 16x16 fuel and ignition maps, closed-loop idle, and &gt;50Hz PC live data and logging.</p>
+      <ul class="specs">
+        <li><span>Firmware</span><span>100% Custom (&gt;600,000 loops/sec)</span></li>
+        <li><span>Outputs</span><span>2x Ignition, 2x Injection out</span></li>
+        <li><span>Tables &amp; Idle</span><span>16x16 Maps, Closed-loop idle</span></li>
+        <li><span>Analog &amp; Sensors</span><span>0-5V Analog, Ext. Wideband &amp; Knock</span></li>
+        <li><span>PC Telemetry</span><span>&gt;50Hz PC Live Data &amp; Logging</span></li>
+      </ul>
+    </div>
+    <div class="media rv" style="--d:.15s"><div class="ph p1" data-speed=".06" role="img" aria-label="NX-ECU Minimum Version circuit board"></div><span class="tag"></span></div>
+  </div>
+</section>
+
+<!-- HARDWARE 2: ECU PCB & MOTORSPORT FEATURES -->
+<section class="pad hw-2">
+  <div class="wrap split flip">
+    <div class="copy rv">
+      <h2>Custom PCB &amp; Race Hardware</h2>
+      <p>Engineered around a custom noise-isolated PCB layout with protected power stages and clean 0-5V analog signal conditioning for external wideband O2 and knock controllers. Packed with dedicated motorsport strategies and auxiliary outputs straight out of the box.</p>
+      <ul class="specs">
+        <li><span>PCB &amp; Inputs</span><span>Noise-isolated PCB, 0-5V Analog I/O</span></li>
+        <li><span>Launch &amp; Boost</span><span>Launch Control &amp; Antilag (ALS)</span></li>
+        <li><span>Shifting</span><span>Quick Shifter &amp; Shift Light</span></li>
+        <li><span>Traction</span><span>Time-Based Traction Control</span></li>
+        <li><span>Aux Outputs</span><span>NOS Injection Out, Thermo Fan, Fuel pump, Idle valve, Shift Light, Light </span></li>
+      </ul>
+    </div>
+    <div class="media rv" style="--d:.15s"><div class="ph p2" data-speed=".06" role="img" aria-label="NX-ECU PCB and hardware architecture"></div><span class="tag"></span></div>
+  </div>
+</section>
+
+<div class="kerb" aria-hidden="true"></div>
+<!-- SOFTWARE -->
+<section id="software" class="pad sw">
+  <div class="wrap">
+    <h2 class="rv">NX-Tuner Pro</h2>
+    <p class="rv" style="--d:.1s">Custom desktop tuning suite for the NX-ECU featuring live 16x16 3D maps, &gt;50Hz PC live data and logging, Auto Tune, and an integrated AI Co-Tuner.</p>
+    <div class="sw-cta rv" style="--d:.15s">
+      <a class="btn" href="https://github.com/NXTuningTech/NX-Tuner_Pro/releases/tag/v1.2" target="_blank" rel="noopener">Download NX-Tuner Pro v1.2</a>
+    </div>
+    <div class="screen rv" style="--d:.2s">
+      <div class="ph"></div>
+      <div class="bar"><i></i><i></i><i></i><span>NX-Tuner Pro v1.2</span></div>
+      <canvas id="map" aria-label="Animated 3D fuel map preview"></canvas>
+    </div>
+    <div class="sw-grid">
+      <div class="rv"><h3>16x16 3D Maps</h3><p>GPU-rendered 16x16 tables with real-time 2D and 3D surface editing for fuel, ignition, and target AFR.</p></div>
+      <div class="rv" style="--d:.08s"><h3>Auto Tune &amp; AI Co-Tuner</h3><p>Built-in Auto Tune and AI Co-Tuner analyze your AFR wideband datalogs and recommend precise map corrections.</p></div>
+      <div class="rv" style="--d:.16s"><h3>&gt;50Hz PC Live Data</h3><p>Stream real-time engine telemetry and record high-speed PC datalogs at over 50Hz to dial in every cell.</p></div>
+      <div class="rv" style="--d:.24s"><h3>Race Strategy Setup</h3><p>Configure Launch Control, Antilag, Quick Shifter, Time-Based Traction Control, NOS Injection.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP STUDIO -->
+<section id="maps" class="pad maps">
+  <div class="wrap">
+    <h2 class="rv">Base Map Generator</h2>
+    <p class="lead rv">Generate 16x16 base VE, ignition and AFR maps from your engine parameters, edit them in 2D or inspect them in 3D, then export straight to TunerStudio.</p>
+    <div class="ms rv">
+      <div class="ms-tabs" id="tabs"><button class="mb on" data-t="ve" type="button">VE fuel</button><button class="mb" data-t="spk" type="button">Spark</button><button class="mb" data-t="afr" type="button">AFR target</button></div>
+      <div class="ms-body">
+        <div><form id="pf" onsubmit="return false"></form><button class="mb on" id="gen" type="button">Generate map</button> <button class="mb" id="exp" type="button">Export .table</button></div>
+        <div>
+          <div class="ms-tabs" id="views"><button class="mb on" data-v="2d" type="button">2D table</button><button class="mb" data-v="3d" type="button">3D surface</button></div>
+          <div class="tw" id="tw" tabindex="0" aria-label="Map table. Select cells, then use the tools below."></div>
+          <canvas id="m3d" hidden aria-label="3D map surface. Drag to rotate."></canvas>
+          <div class="tools">
+            <input id="tv" type="number" step="any" placeholder="value or %" aria-label="Tool value">
+            <button class="mb" data-a="set" type="button">Set</button><button class="mb" data-a="add" type="button">Add</button><button class="mb" data-a="mul" type="button">Multiply %</button><button class="mb" data-a="smooth" type="button">Smooth %</button><button class="mb" data-a="i2" type="button">Interp 2D</button><button class="mb" data-a="ih" type="button">Interp H</button><button class="mb" data-a="iv" type="button">Interp V</button>
+          </div>
+          <p class="hint">Drag or shift-click to select. Double-click a cell to type a value. Keys + and - nudge by 0.5, Ctrl+I interpolates.</p>
         </div>
-    </nav>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="kerb" aria-hidden="true"></div>
+<!-- LAB -->
+<section id="lab" class="pad lab">
+  <div class="wrap">
+    <div class="lab-head rv">
+      <h2>The Lab</h2>
+      <p>Every custom PCB revision, firmware build and engine test gets pushed to the limit. Follow the development of our standalone ECU as it happens.</p>
+    </div>
+    <div class="split">
+      <a class="video rv" href="https://www.youtube.com/shorts/BnxheQMrU6Q" target="_blank" rel="noopener" aria-label="Watch NX Tuning Tech on YouTube">
+        <div class="ph"></div><span class="play"></span><span class="cap"></span>
+      </a>
+      <div class="stats rv" style="--d:.15s">
+        <div class="stat"><strong data-count="100" data-suffix="%">0</strong><span>Custom Firmware &amp; PCB</span></div>
+        <div class="stat"><strong data-count="600000" data-suffix="+">0</strong><span>Loops Per Second</span></div>
+        <div class="stat"><strong data-count="50" data-suffix="Hz+">0</strong><span>PC Live Data &amp; Logging</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
 
-    <!-- 1. HERO SECTION (Εντυπωσιακή Είσοδος) -->
-    <section class="hero">
-        <h1>BEYOND LIMITS</h1>
-        <div class="subtitle">Engineered for Absolute Performance</div>
-    </section>
+<footer id="contact">
+  <div class="wrap">
+    <div class="term rv" id="term">
+      <div><span class="p">nx@tuning-tech</span>:<span class="v">~</span>$ whoami</div>
+      <div>NX Tuning Tech: Custom Standalone ECU (Minimum Version) &amp; NX-Tuner Pro Software.</div>
+      <div><span class="p">nx@tuning-tech</span>:<span class="v">~</span>$ contact --list</div>
+      <div>github&nbsp;&nbsp;&nbsp;&nbsp; <a href="https://github.com/NXTuningTech/NX-Tuner_Pro/releases/tag/v1.2" target="_blank" rel="noopener">NX-Tuner Pro v1.2 Release</a></div>
+      <div>instagram&nbsp; <a href="https://www.instagram.com/nx_tuning_tech/" target="_blank" rel="noopener">@nx_tuning_tech</a></div>
+      <div>youtube&nbsp;&nbsp;&nbsp; <a href="https://www.youtube.com/@NXTuningTech" target="_blank" rel="noopener">@NXTuningTech</a></div>
+      <div><span class="p">nx@tuning-tech</span>:<span class="v">~</span>$ <span class="caret"></span></div>
+    </div>
+    <div class="legal"><span>&copy; <span id="yr">2026</span> NX Tuning Tech</span><span>Race and off-road use only. Check local regulations.</span></div>
+  </div>
+</footer>
 
-    <!-- 2. Ο ΕΓΚΕΦΑΛΟΣ (Hardware) -->
-    <section id="hardware" class="showcase">
-        <div class="showcase-text">
-            <h2>THE NX CORE</h2>
-            <p>Designed without compromise. The NX Standalone ECU features state-of-the-art multi-layer PCB architecture, encased in ultra-durable, custom-manufactured ASA enclosures built for extreme thermal and mechanical resistance. Raw processing power meets motorsport reliability.</p>
-        </div>
-        <div class="showcase-image-container">
-            <!-- Άλλαξε το αρχείο 'ecu_hardware.jpg' στο CSS (γραμμή 138) -->
-            <div class="showcase-image img-ecu"></div>
-        </div>
-    </section>
+<script>
+(()=>{
+const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+$('#yr').textContent=new Date().getFullYear();
 
-    <!-- 3. CONTROLLERS & ΠΕΡΙΦΕΡΕΙΑΚΑ -->
-    <section id="accessories" class="showcase reverse">
-        <div class="showcase-text">
-            <h2>PRECISION MODULES</h2>
-            <p>Seamless integration with your powertrain. From advanced CAN-bus telemetry controllers to dedicated data loggers, every accessory is rigorously tested to perform flawlessly under high-stress racing conditions. Expand your capabilities infinitely.</p>
-        </div>
-        <div class="showcase-image-container">
-            <!-- Άλλαξε το αρχείο 'controllers.jpg' στο CSS (γραμμή 139) -->
-            <div class="showcase-image img-controllers"></div>
-        </div>
-    </section>
+/* nav */
+const nav=$('#nav'),links=$('#links'),burger=$('#burger');
+const onScroll=()=>nav.classList.toggle('solid',scrollY>40);
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+burger.addEventListener('click',()=>{const o=links.classList.toggle('open');burger.setAttribute('aria-expanded',o);burger.textContent=o?'CLOSE':'MENU'});
+$$('a',links).forEach(a=>a.addEventListener('click',()=>{links.classList.remove('open');burger.textContent='MENU';burger.setAttribute('aria-expanded',false)}));
 
-    <!-- 4. ΤΟ ΛΟΓΙΣΜΙΚΟ (NX-Tuner Pro) -->
-    <section id="software" class="software-section">
-        <h2>NX-TUNER PRO</h2>
-        <p>The bridge between raw hardware capability and ultimate performance. A desktop calibration environment offering zero-lag telemetry, 3D OpenGL map rendering, and AI-assisted engine tuning algorithms. The interface of champions.</p>
-        <!-- Η εικόνα μπαίνει ως φόντο (Άλλαξε το 'nx_tuner_pro_screenshot.jpg' στο CSS, γραμμή 151) -->
-    </section>
+/* cursor */
+if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!reduce){
+  document.body.classList.add('has-cur');
+  const c=$('.cur'),d=$('.cur-dot');let x=innerWidth/2,y=innerHeight/2,cx=x,cy=y;
+  addEventListener('mousemove',e=>{x=e.clientX;y=e.clientY;d.style.transform=`translate(${x}px,${y}px)`},{passive:true});
+  (function loop(){cx+=(x-cx)*.16;cy+=(y-cy)*.16;c.style.transform=`translate(${cx}px,${cy}px)`;requestAnimationFrame(loop)})();
+  $$('a,button,.media,.screen').forEach(el=>{el.addEventListener('mouseenter',()=>c.classList.add('hot'));el.addEventListener('mouseleave',()=>c.classList.remove('hot'))});
+}
 
-    <footer>
-        <span class="brand-font">NX TUNING TECH</span>
-        <p style="font-size: 0.8rem;">&copy; 2026. All rights reserved.</p>
-    </footer>
+/* reveal + counters */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;e.target.classList.add('in');io.unobserve(e.target);
+  $$('[data-count]',e.target).forEach(count);
+}),{threshold:.15,rootMargin:'0px 0px -6% 0px'});
+$$('.rv').forEach(el=>io.observe(el));
+function count(el){
+  const to=+el.dataset.count,suf=el.dataset.suffix||'',t0=performance.now(),dur=reduce?1:1800;
+  (function f(t){const p=Math.min((t-t0)/dur,1),v=Math.round(to*(1-Math.pow(1-p,4)));el.textContent=v.toLocaleString('en')+suf;if(p<1)requestAnimationFrame(f)})(t0);
+}
 
-    <!-- JAVASCRIPT ΓΙΑ ΤΑ ANIMATIONS ΕΜΦΑΝΙΣΗΣ -->
-    <script>
-        // Αλλάζει το φόντο του μενού όταν σκρολάρεις
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.style.background = 'rgba(3, 3, 3, 0.95)';
-            } else {
-                navbar.style.background = 'linear-gradient(to bottom, rgba(3,3,3,0.9) 0%, rgba(3,3,3,0) 100%)';
-            }
-        });
+/* parallax */
+const px=$$('[data-speed]');let ticking=false;
+function par(){ticking=false;if(reduce)return;const h=innerHeight;px.forEach(el=>{const r=el.parentElement.getBoundingClientRect();if(r.bottom<-200||r.top>h+200)return;
+  const s=+el.dataset.speed,off=(r.top+r.height/2-h/2)*s*-1;el.style.transform=`translate3d(0,${off.toFixed(1)}px,0)`})}
+addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(par)}},{passive:true});par();
 
-        // Εμφανίζει τις ενότητες με fade-in καθώς σκρολάρεις προς τα κάτω
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.2 }); // Ενεργοποιείται όταν το 20% της ενότητας μπει στην οθόνη
+/* hero speed lines */
+const cv=$('#fx'),hc=cv.getContext('2d');let W,H,L=[],running=true,boost=0,lastY=scrollY;
+const nl=init=>({x:init?Math.random()*W:W+Math.random()*300,y:Math.random()*H,len:80+Math.random()*320,v:7+Math.random()*16,w:Math.random()>.9?2:1,c:Math.random()>.78?'255,255,255':'109,245,39',a:.15+Math.random()*.5});
+function size(){const dpr=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;hc.setTransform(dpr,0,0,dpr,0,0);L=Array.from({length:W<700?20:44},()=>nl(true))}
+size();addEventListener('resize',size);
+addEventListener('scroll',()=>{boost=Math.min(1,Math.abs(scrollY-lastY)*.02);lastY=scrollY},{passive:true});
+new IntersectionObserver(([e])=>{running=e.isIntersecting;if(running)draw()}).observe(cv);
+function draw(){
+  if(!running)return;hc.clearRect(0,0,W,H);boost*=.92;
+  for(const l of L){
+    if(!reduce)l.x-=l.v*(1+boost*2.5);
+    if(l.x+l.len<0)Object.assign(l,nl(false));
+    const gr=hc.createLinearGradient(l.x,0,l.x+l.len,0);gr.addColorStop(0,`rgba(${l.c},0)`);gr.addColorStop(1,`rgba(${l.c},${l.a})`);
+    hc.strokeStyle=gr;hc.lineWidth=l.w;hc.beginPath();hc.moveTo(l.x,l.y);hc.lineTo(l.x+l.len,l.y-l.len*.12);hc.stroke();
+  }
+  if(!reduce)requestAnimationFrame(draw);
+}
+draw();
 
-        document.querySelectorAll('.showcase, .software-section').forEach((el) => {
-            observer.observe(el);
-        });
-    </script>
+/* telemetry */
+const T={rpm:$('#t-rpm'),map:$('#t-map'),afr:$('#t-afr'),ign:$('#t-ign')};
+let tt=0;const SL=$$('#shift i');
+setInterval(()=>{if(reduce&&tt)return;tt+=.18;
+  const r=Math.round(3200+Math.sin(tt)*2600+Math.sin(tt*2.7)*300);
+  T.rpm.textContent=String(r).padStart(4,'0');const lit=Math.max(0,Math.min(15,Math.round((r-900)/5200*15)));SL.forEach((el,i)=>el.classList.toggle('on',i<lit));
+  T.map.textContent=String(Math.round(95+Math.sin(tt-.4)*70)).padStart(3,'0');
+  T.afr.textContent=(12.6+Math.sin(tt*1.3)*.9).toFixed(1);
+  T.ign.textContent=(22+Math.sin(tt*.8)*9).toFixed(1).padStart(4,'0');
+},120);
+
+/* 3D fuel map preview (canvas wireframe) */
+const mc=$('#map'),m=mc.getContext('2d');let mw,mh,run2=false,ang=0;
+function msize(){const dpr=Math.min(devicePixelRatio||1,2);mw=mc.clientWidth;mh=mc.clientHeight;mc.width=mw*dpr;mc.height=mh*dpr;m.setTransform(dpr,0,0,dpr,0,0)}
+msize();addEventListener('resize',msize);
+const N=16;
+function h(i,j,t){const x=i/(N-1),y=j/(N-1);return Math.sin(x*3.2+t)*.5*Math.cos(y*2.6-t*.7)+Math.exp(-((x-.65)**2+(y-.4)**2)*9)*.9}
+function proj(i,j,t){const x=(i/(N-1)-.5)*2,z=(j/(N-1)-.5)*2,y=-h(i,j,t)*.55,a=.62+Math.sin(ang)*.12;
+  const rx=x*Math.cos(a)-z*Math.sin(a),rz=x*Math.sin(a)+z*Math.cos(a),k=Math.min(mw,mh*1.7)*.28;
+  return [mw/2+rx*k*1.25,mh*.58+(y*.9+rz*.42)*k*1.15,y]}
+function mdraw(t){
+  if(!run2)return;m.clearRect(0,0,mw,mh);ang=t*.0003;const tt2=t*.0009;
+  for(let pass=0;pass<2;pass++)for(let a=0;a<N;a++){m.beginPath();
+    for(let b=0;b<N;b++){const [px_,py_]=pass?proj(b,a,tt2):proj(a,b,tt2);b?m.lineTo(px_,py_):m.moveTo(px_,py_)}
+    const g=a/(N-1);m.strokeStyle=`rgba(${Math.round(31+g*78)},${Math.round(154+g*91)},${Math.round(46-g*7)},${.22+.4*g})`;m.lineWidth=1;m.stroke()}
+  if(!reduce)requestAnimationFrame(mdraw);
+}
+new IntersectionObserver(([e])=>{run2=e.isIntersecting;if(run2)requestAnimationFrame(mdraw)},{threshold:.1}).observe(mc);
+})();
+</script>
+<script>
+(()=>{
+const $=(q,c=document)=>c.querySelector(q),$$=(q,c=document)=>[...c.querySelectorAll(q)];
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const lin=(a,b,n)=>Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));
+const P={hp_rpm:6000,tq_rpm:4500,idle_rpm:900,max_rpm:7500,idle_map:35,max_map:100,bore:85,chamber:2,fuel:2,cr:2,afr_fuel:0,size:16};
+const LB={hp_rpm:'Peak HP RPM',tq_rpm:'Peak torque RPM',idle_rpm:'Idle RPM',max_rpm:'Redline RPM',idle_map:'Idle MAP (kPa)',max_map:'Max MAP (kPa)',bore:'Cylinder bore (mm)',chamber:'Chamber type',fuel:'Fuel',cr:'Compression',afr_fuel:'Fuel',size:'Table size'};
+const OPT={chamber:['Open chamber','2-valve wedge','3/4-valve pentroof'],fuel:['87 octane','91/92 octane','94+ octane','E85'],cr:['< 9.0:1','9.1 - 10.0:1','10.1 - 11.5:1','> 11.6:1'],afr_fuel:['Gasoline (14.7)','E85 (9.76)'],size:[8,12,16,24]};
+const FIELDS={ve:['hp_rpm','tq_rpm','idle_rpm','max_rpm','idle_map','max_map','size'],spk:['bore','chamber','fuel','cr','idle_map','max_map','idle_rpm','max_rpm','size'],afr:['afr_fuel','idle_map','max_map','idle_rpm','max_rpm','size']};
+const META={ve:{file:'veTable1Tbl.table',rev:0},spk:{file:'ignTable1Tbl.table',rev:0},afr:{file:'afrTable1Tbl.table',rev:1}};
+const axes=()=>{const mm=Math.max(15,P.idle_map-10);return[lin(P.idle_rpm*.8,P.max_rpm,P.size),lin(P.max_map,mm,P.size),mm]};
+const G={
+ve(){const[xb,yb,mm]=axes(),{hp_rpm:hp,tq_rpm:tq,idle_rpm:ir,max_rpm:mr}=P;
+  const d=yb.map(m=>xb.map(x=>{const b=x<=tq?50+Math.max(0,(x-ir)/((tq-ir)||1))*45:x<=hp?95-((x-tq)/((hp-tq)||1))*5:90-Math.min(1,(x-hp)/((mr-hp)||1))*15;
+    const v=m<=100?b*Math.max(.4,(m-mm)/((100-mm)||1)):b*(1+((m-100)/100)*.15);return Math.trunc(Math.max(20,Math.min(140,v)))}));
+  return{xb,yb,d}},
+spk(){const[xb,yb,mm]=axes(),{bore,chamber:ch,fuel,cr,idle_rpm:ir,max_rpm:mr}=P;
+  let a=ch==0?36:ch==1?32:28;a+=((bore/25.4)-4)/.25*1.5;a+=cr==0?2:cr==2?-2:cr==3?-4:0;a+=fuel==0?-2:fuel==2?2:fuel==3?4:0;
+  const i100=14,imin=18,xmin=a+12;
+  const d=yb.map(m=>xb.map(x=>{const rr=clamp((x-ir)/((mr-ir)||1)),a100=i100+rr*(a-i100),amin=imin+rr*(xmin-imin);let v;
+    if(m<=100)v=amin+clamp((m-mm)/((100-mm)||1))*(a100-amin);else v=a100-(m-100)*.145038*(fuel==3?.2:fuel==0?.6:.4);
+    return Math.max(-5,Math.min(55,v))}));
+  return{xb,yb,d}},
+afr(){const[xb,yb]=axes(),e=P.afr_fuel==1,st=e?9.76:14.7,cru=e?10.5:15.5,idl=e?9:13.8,wot=e?7.8:12.5,bst=e?7:11.5;
+  const d=yb.map(m=>xb.map(x=>{let a;if(m<40)a=cru;else if(m<75)a=cru-((m-40)/35)*(cru-st);else if(m<=100)a=st-((m-75)/25)*(st-wot);else a=wot-Math.min(1,(m-100)/100)*(wot-bst);
+    if(x<=P.idle_rpm*1.2&&P.idle_map*.8<=m&&m<=P.idle_map*1.2)a=idl;return a}));
+  return{xb,yb,d}}};
+const S={};
+const gen=t=>{const m=G[t]();m.d=m.d.map(r=>r.map(v=>+(isFinite(v)?v:0).toFixed(1)));S[t]={...m,...META[t]}};
+
+const ST=[[0,[0,50,255]],[.2,[0,230,255]],[.4,[0,255,50]],[.6,[255,255,0]],[.8,[255,140,0]],[1,[255,20,20]]];
+function heat(n,rev){const st=rev?ST.map((s,i)=>[s[0],ST[5-i][1]]):ST;for(let i=0;i<5;i++)if(n<=st[i+1][0]){const t=(n-st[i][0])/(st[i+1][0]-st[i][0]);return st[i][1].map((v,k)=>Math.round(v+t*(st[i+1][1][k]-v)))}return st[5][1]}
+
+let cur='ve',sel=null,drag=false,yaw=.7,pitch=.62;
+const tw=$('#tw'),cv=$('#m3d'),g2=cv.getContext('2d'),M=()=>S[cur];
+const range=()=>{const v=[].concat(...M().d),mn=Math.min(...v),mx=Math.max(...v);return[mn,mx===mn?mn+1:mx]};
+const box=()=>sel&&{r0:Math.min(sel.r0,sel.r1),r1:Math.max(sel.r0,sel.r1),c0:Math.min(sel.c0,sel.c1),c1:Math.max(sel.c0,sel.c1)};
+
+function renderTable(){
+  const m=M(),[mn,mx]=range();
+  let b='';m.d.forEach((row,r)=>{b+=`<tr><th>${Math.trunc(m.yb[r])}</th>`+row.map((v,c)=>{const[R,Gc,B]=heat(clamp((v-mn)/(mx-mn)),m.rev);return`<td data-r="${r}" data-c="${c}" style="background:rgb(${R},${Gc},${B})">${v.toFixed(1)}</td>`}).join('')+'</tr>'});
+  tw.innerHTML=`<table><thead><tr><th>kPa / RPM</th>${m.xb.map(x=>`<th>${Math.trunc(x)}</th>`).join('')}</tr></thead><tbody>${b}</tbody></table>`;
+  paintSel();
+}
+function paintSel(){const b=box();$$('td',tw).forEach(t=>{const r=+t.dataset.r,c=+t.dataset.c;t.classList.toggle('sel',!!b&&r>=b.r0&&r<=b.r1&&c>=b.c0&&c<=b.c1)});draw3()}
+function draw3(){
+  if(cv.hidden)return;const dpr=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+  g2.setTransform(dpr,0,0,dpr,0,0);g2.clearRect(0,0,w,h);
+  const m=M(),[mn,mx]=range(),R=m.d.length,C=m.d[0].length,k=Math.min(w,h*1.5)/(Math.max(R,C)*1.25),sc=6/(mx-mn);
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const pt=m.d.map((row,r)=>row.map((v,c)=>{const x=c-(C-1)/2,y=(R-1)/2-r,z=(v-mn)*sc-3,rx=x*cy-y*sy,ry=x*sy+y*cy;return{x:w/2+rx*k,y:h*.58-(z*cp+ry*sp)*k,d:ry*cp-z*sp}}));
+  const q=[];
+  for(let r=0;r<R-1;r++)for(let c=0;c<C-1;c++){const p=[pt[r][c],pt[r][c+1],pt[r+1][c+1],pt[r+1][c]];q.push({p,dp:p[0].d+p[1].d+p[2].d+p[3].d,v:(m.d[r][c]+m.d[r][c+1]+m.d[r+1][c]+m.d[r+1][c+1])/4})}
+  q.sort((a,b)=>b.dp-a.dp);
+  g2.lineWidth=1;g2.strokeStyle='rgba(0,0,0,.45)';
+  q.forEach(o=>{const[a,b,c]=heat(clamp((o.v-mn)/(mx-mn)),m.rev);g2.fillStyle=`rgb(${a},${b},${c})`;g2.beginPath();o.p.forEach((p,i)=>i?g2.lineTo(p.x,p.y):g2.moveTo(p.x,p.y));g2.closePath();g2.fill();g2.stroke()});
+  const bx=box();if(bx){g2.fillStyle='#fff';g2.strokeStyle='#6df527';g2.lineWidth=2;for(let r=bx.r0;r<=bx.r1;r++)for(let c=bx.c0;c<=bx.c1;c++){const p=pt[r][c];g2.beginPath();g2.arc(p.x,p.y-4,4,0,6.3);g2.fill();g2.stroke()}}
+}
+
+/* selection + editing */
+const cell=e=>{const t=e.target.closest&&e.target.closest('td');return t&&{r:+t.dataset.r,c:+t.dataset.c}};
+tw.addEventListener('mousedown',e=>{const x=cell(e);if(!x||e.target.isContentEditable)return;e.preventDefault();tw.focus();
+  if(e.shiftKey&&sel){sel.r1=x.r;sel.c1=x.c}else sel={r0:x.r,c0:x.c,r1:x.r,c1:x.c};drag=true;paintSel()});
+tw.addEventListener('mouseover',e=>{if(!drag)return;const x=cell(e);if(x&&(x.r!==sel.r1||x.c!==sel.c1)){sel.r1=x.r;sel.c1=x.c;paintSel()}});
+addEventListener('mouseup',()=>{drag=false});
+tw.addEventListener('dblclick',e=>{const t=e.target.closest('td');if(!t)return;t.contentEditable='true';t.focus();getSelection().selectAllChildren(t);
+  const done=ok=>{t.removeEventListener('blur',onb);t.contentEditable='false';const v=parseFloat(t.textContent);if(ok&&isFinite(v))M().d[+t.dataset.r][+t.dataset.c]=+v.toFixed(1);renderTable()};
+  const onb=()=>done(true);t.addEventListener('blur',onb);
+  t.addEventListener('keydown',k=>{if(k.key==='Enter'){k.preventDefault();done(true)}else if(k.key==='Escape')done(false)})});
+tw.addEventListener('keydown',e=>{if(e.target.isContentEditable)return;
+  if(e.key==='+'||e.key==='='){e.preventDefault();mod(v=>v+.5)}else if(e.key==='-'){e.preventDefault();mod(v=>v-.5)}else if(e.ctrlKey&&e.key.toLowerCase()==='i'){e.preventDefault();interp2()}});
+
+/* tools */
+const tv=()=>parseFloat($('#tv').value);
+function mod(f){const b=box();if(!b)return;const d=M().d;for(let r=b.r0;r<=b.r1;r++)for(let c=b.c0;c<=b.c1;c++)d[r][c]=+f(d[r][c]).toFixed(1);renderTable()}
+function smooth(){const b=box(),d=M().d;if(!b||(b.r0==b.r1&&b.c0==b.c1))return;const s=clamp((isFinite(tv())?tv():50)/100),o=d.map(r=>r.slice());
+  for(let r=b.r0;r<=b.r1;r++)for(let c=b.c0;c<=b.c1;c++){let sum=0,n=0;for(let i=r-1;i<=r+1;i++)for(let j=c-1;j<=c+1;j++)if(o[i]&&o[i][j]!==undefined){sum+=o[i][j];n++}d[r][c]=+(o[r][c]*(1-s)+sum/n*s).toFixed(1)}renderTable()}
+function interp2(){const b=box(),d=M().d;if(!b||(b.r0==b.r1&&b.c0==b.c1))return;const tl=d[b.r0][b.c0],tr=d[b.r0][b.c1],bl=d[b.r1][b.c0],br=d[b.r1][b.c1];
+  for(let r=b.r0;r<=b.r1;r++)for(let c=b.c0;c<=b.c1;c++){const rr=(r-b.r0)/Math.max(1,b.r1-b.r0),cc=(c-b.c0)/Math.max(1,b.c1-b.c0),top=tl+(tr-tl)*cc,bot=bl+(br-bl)*cc;d[r][c]=+(top+(bot-top)*rr).toFixed(1)}renderTable()}
+function interp1(h){const b=box(),d=M().d;if(!b)return;
+  if(h&&b.c0!==b.c1)for(let r=b.r0;r<=b.r1;r++){const a=d[r][b.c0],z=d[r][b.c1];for(let c=b.c0;c<=b.c1;c++)d[r][c]=+(a+(z-a)*((c-b.c0)/(b.c1-b.c0))).toFixed(1)}
+  if(!h&&b.r0!==b.r1)for(let c=b.c0;c<=b.c1;c++){const a=d[b.r0][c],z=d[b.r1][c];for(let r=b.r0;r<=b.r1;r++)d[r][c]=+(a+(z-a)*((r-b.r0)/(b.r1-b.r0))).toFixed(1)}
+  renderTable()}
+$$('.tools [data-a]').forEach(btn=>btn.addEventListener('click',()=>{const a=btn.dataset.a,v=tv();
+  if(a==='set'&&isFinite(v))mod(()=>v);else if(a==='add'&&isFinite(v))mod(x=>x+v);else if(a==='mul'&&isFinite(v))mod(x=>x*(1+v/100));
+  else if(a==='smooth')smooth();else if(a==='i2')interp2();else if(a==='ih')interp1(true);else if(a==='iv')interp1(false)}));
+
+/* 3D rotate */
+let pd=null;
+cv.addEventListener('pointerdown',e=>{pd=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!pd)return;yaw+=(e.clientX-pd[0])*.01;pitch=clamp(pitch+(e.clientY-pd[1])*.008,.15,1.35);pd=[e.clientX,e.clientY];draw3()});
+cv.addEventListener('pointerup',()=>{pd=null});
+addEventListener('resize',draw3);
+
+/* params, tabs, views */
+function form(){
+  $('#pf').innerHTML=FIELDS[cur].map(k=>OPT[k]?`<label>${LB[k]}<select data-k="${k}">${OPT[k].map((o,i)=>{const v=k=='size'?o:i;return`<option value="${v}"${P[k]==v?' selected':''}>${k=='size'?o+' x '+o:o}</option>`}).join('')}</select></label>`:`<label>${LB[k]}<input data-k="${k}" type="number" step="any" value="${P[k]}"></label>`).join('');
+}
+$('#pf').addEventListener('input',e=>{const k=e.target.dataset.k,v=parseFloat(e.target.value);if(k&&isFinite(v))P[k]=v});
+$('#gen').addEventListener('click',()=>{if(P.max_rpm<=P.idle_rpm){alert('Redline must be higher than idle RPM.');return}gen(cur);sel=null;renderTable()});
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;cur=b.dataset.t;sel=null;$$('#tabs .mb').forEach(x=>x.classList.toggle('on',x===b));form();renderTable()});
+$('#views').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;const d3=b.dataset.v==='3d';$$('#views .mb').forEach(x=>x.classList.toggle('on',x===b));tw.hidden=d3;cv.hidden=!d3;draw3()});
+
+/* export (TunerStudio .table) */
+$('#exp').addEventListener('click',()=>{
+  const m=M(),R=m.d.length,C=m.d[0].length,pad='         ';
+  const xs='\n'+pad+m.xb.map(x=>Math.trunc(x)).join(' \n'+pad)+' \n      ';
+  const ys='\n'+pad+[...m.yb].reverse().map(y=>Math.trunc(y)).join(' \n'+pad)+' \n      ';
+  let z='\n';for(let r=R-1;r>=0;r--)z+=pad+m.d[r].map(v=>v.toFixed(1)+' ').join('')+'\n';z+='      ';
+  const xml=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<tableData xmlns="http://www.EFIAnalytics.com/:table"><bibliography author="NX Tuning Tech - Map Studio" company="NX Tuning Tech" writeDate="${new Date().toDateString()}"/><versionInfo fileFormat="1.0"/><table cols="${C}" rows="${R}"><xAxis cols="${C}" name="rpm">${xs}</xAxis><yAxis name="Engine_Load" rows="${R}">${ys}</yAxis><zValues cols="${C}" rows="${R}">${z}</zValues></table></tableData>`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([xml],{type:'application/xml'}));a.download=m.file;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
+
+['ve','spk','afr'].forEach(gen);form();renderTable();
+})();
+</script>
 </body>
 </html>
